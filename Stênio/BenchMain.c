@@ -2,65 +2,93 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define M 4096
-#define N 4096
-
-// Aloca uma matriz por linhas na forma de um array 1D
-double *alocaMatriz1d(const int n, const int m);
-
-// gemm -> C = alpha * A * B + beta * C (A: n x m, B: m x l, C: n x l)
-// matrizes alocadas na forma de um array 1D, uma linha após a outra
-void dgemm1d(const int nAC, const int mAB, const int lBC, double alpha, double *A, double *B, double beta, double *C);
+double *alocaMatriz1d(int nl, int nc);
+void dgemm1d(int m, int n, int k, double alpha, double *matA, double *matB, double beta, double *matC);
 
 int main(void)
 {
-    int n, m, l;
 
-    // declaração as matrizes
+    FILE *fp = fopen("gemmMatrixBench.bin", "rb");
+
+    if (fp == NULL)
+    {
+        printf("Arquivo não pode ser aberto\n");
+        exit(1);
+    }
+
+    double alpha, beta;
+    int nla, nlb, nlc, nca, ncb, ncc;
     double *matA, *matB, *matC;
 
-    // As matrizes e seus parâmetros serão lidas
-    // do arquivo gemmMatrixBench.bin
+    // Alpha
+    fread(&alpha, sizeof(double), 1, fp);
+    printf("alpha: %.1lf\n", alpha);
 
+    // Matrix A
+    fread(&nla, sizeof(int), 1, fp);
+    fread(&nca, sizeof(int), 1, fp);
+    printf("Matrix A dimensions: %d x %d\n", nla, nca);
 
-    // para alocação das matrizes
-    matA = alocaMatriz1d(n, m);
+    matA = alocaMatriz1d(nla, nca);
+    fread(matA, sizeof(double), nla * nca, fp);
 
-    matB = alocaMatriz1d(m, n);
+    // Matrix B
+    fread(&nlb, sizeof(int), 1, fp);
+    fread(&ncb, sizeof(int), 1, fp);
+    printf("Matrix B dimensions: %d x %d\n", nlb, ncb);
 
-    matC = alocaMatriz1d(n, n);
+    matB = alocaMatriz1d(nlb, ncb);
+    fread(matB, sizeof(double), nlb * ncb, fp);
 
-    // para quantificar o tempo de execução
-    clock_t start_t, end_t;
+    // Beta
+    fread(&beta, sizeof(double), 1, fp);
+    printf("Beta: %.1lf\n", beta);
+
+    // Matrix C
+    fread(&nlc, sizeof(int), 1, fp);
+    fread(&ncc, sizeof(int), 1, fp);
+    printf("Matrix C dimensions: %d x %d\n", nlc, ncc);
+
+    matC = alocaMatriz1d(nlc, ncc);
+    fread(matC, sizeof(double), nlc * ncc, fp);
+
+    // Teste
+    clock_t start_t,
+        end_t;
     double total_t;
     start_t = clock();
 
-    // chamando a rotina dgemm
-    dgemm1d(n, m, n, 0.5, matA, matB, 2.0, matC);
+    dgemm1d(nla, ncb, nca, alpha, matA, matB, beta, matC);
 
     end_t = clock();
     total_t = (double)(end_t - start_t) / CLOCKS_PER_SEC;
     printf("Total time taken by CPU: %f\n", total_t);
 
-    // liberando a memória alocada
-    // free(matA[0]);
     free(matA);
-    // free(matB[0]);
     free(matB);
-    // free(matC[0]);
     free(matC);
-
     return 0;
 }
 
 double *alocaMatriz1d(const int n, const int m)
 {
     double *mat;
-    // aqui vc implementa a sua alocação de matriz 1D
+    mat = (double *)malloc(n * m * sizeof(double));
     return mat;
 }
 
-void dgemm1d(const int n, const int m, const int l, double alpha, double *A, double *B, double beta, double *C)
+void dgemm1d(int m, int n, int k, double alpha, double *matA, double *matB, double beta, double *matC)
 {
-    // aqui vc implementa a sua rotina dgemm1d
+    for (int i = 0; i < m; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            double cij = beta * matC[i * n + j];
+            for (int p = 0; p < k; p++)
+            {
+                cij += alpha * matA[i * k + p] * matB[p * n + j];
+            }
+            matC[i * n + j] = cij;
+        }
+    }
 }
