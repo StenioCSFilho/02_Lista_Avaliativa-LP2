@@ -89,6 +89,8 @@ int main(void)
 
     system("pause");
 
+    fclose(fp);
+    
     free(matA);
     free(matB);
     free(matC);
