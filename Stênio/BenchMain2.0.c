@@ -1,12 +1,22 @@
+// gcc -fopenmp BenchMain2.0.c
+
+//----------------------------------------------------------------------------//
+// Librays//
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <omp.h>
-// gcc -fopenmp BenchMain2.0.c
+
+//----------------------------------------------------------------------------//
+// Functions//
 
 double *alocaMatriz1d(int nl, int nc);
 void dgemm1d(int m, int n, int k, double alpha, double *matA, double *matB, double beta, double *matC);
-void print_matrix(const char *desc, int m, int n, double *mat);
+void printMatriz(const char *desc, int m, int n, double *mat);
+
+//----------------------------------------------------------------------------//
+// Main//
 
 int main(void)
 {
@@ -69,7 +79,7 @@ int main(void)
 
     system("pause");
 
-    print_matrix("Matriz Resultante C:", nlc, ncc, matC);
+    printMatriz("Matriz Resultante C:", nlc, ncc, matC);
 
     system("pause");
 
@@ -78,6 +88,9 @@ int main(void)
     free(matC);
     return 0;
 }
+
+//----------------------------------------------------------------------------//
+// Declared Functions//
 
 double *alocaMatriz1d(const int n, const int m)
 {
@@ -120,7 +133,7 @@ void dgemm1d(int m, int n, int k, double alpha, double *matA, double *matB, doub
     }
 }
 
-void print_matrix(const char *desc, int m, int n, double *mat)
+void printMatriz(const char *desc, int m, int n, double *mat)
 {
     printf("\n%s \n", desc);
     m = 5;
