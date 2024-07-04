@@ -1,4 +1,10 @@
+//----------------------------------------------------------------------------//
+// Notes//
+
+// Ao Compilar, usar o comando abaixo no terminal:
 // gcc -fopenmp BenchMain2.0.c
+// Abrir o executável gerado na mesma pasta
+// O arquivo gemmMatrixBench.bin deve estar na mesma página do executável
 
 //----------------------------------------------------------------------------//
 // Librays//
