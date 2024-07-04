@@ -25,25 +25,23 @@ int main(void)
 
     // Alpha
     fread(&alpha, sizeof(double), 1, fp);
-    printf("\nalpha: %.1lf\n", alpha);
+    printf("\nAlpha: %.1lf\n", alpha);
 
     // Matrix A
     fread(&nla, sizeof(int), 1, fp);
     fread(&nca, sizeof(int), 1, fp);
-    printf("Matrix A dimensions: %d x %d\n", nla, nca);
+    printf("Dimenções Matriz A : %d x %d\n", nla, nca);
 
     matA = alocaMatriz1d(nla, nca);
     fread(matA, sizeof(double), nla * nca, fp);
-    print_matrix("Matrix A", nla, nca, matA);
 
     // Matrix B
     fread(&nlb, sizeof(int), 1, fp);
     fread(&ncb, sizeof(int), 1, fp);
-    printf("Matrix B dimensions: %d x %d\n", nlb, ncb);
+    printf("Dimenções Matriz B : %d x %d\n", nlb, ncb);
 
     matB = alocaMatriz1d(nlb, ncb);
     fread(matB, sizeof(double), nlb * ncb, fp);
-    print_matrix("Matrix B", nlb, ncb, matB);
 
     // Beta
     fread(&beta, sizeof(double), 1, fp);
@@ -52,11 +50,10 @@ int main(void)
     // Matrix C
     fread(&nlc, sizeof(int), 1, fp);
     fread(&ncc, sizeof(int), 1, fp);
-    printf("Matrix C dimensions: %d x %d\n", nlc, ncc);
+    printf("Dimenções Matriz C : %d x %d\n", nlc, ncc);
 
     matC = alocaMatriz1d(nlc, ncc);
     fread(matC, sizeof(double), nlc * ncc, fp);
-    print_matrix("Matrix C:", nlc, ncc, matC);
 
     // Teste
     clock_t start_t,
@@ -109,7 +106,7 @@ void dgemm1d(int m, int n, int k, double alpha, double *matA, double *matB, doub
                             matC[i * n + j] *= beta;
                         }
 
-                        double cij = 0.0;  // Initialize to zero for accumulation
+                        double cij = 0.0;
                         for (int p = kk; p < kk + blockSize && p < k; p++)
                         {
                             cij += matA[i * k + p] * matB[p * n + j];
@@ -126,8 +123,8 @@ void dgemm1d(int m, int n, int k, double alpha, double *matA, double *matB, doub
 void print_matrix(const char *desc, int m, int n, double *mat)
 {
     printf("\n%s \n", desc);
-    m = 1;
-    n = 2;
+    m = 5;
+    n = 5;
     for (int i = 0; i < m; i++)
     {
         for (int j = 0; j < n; j++)
