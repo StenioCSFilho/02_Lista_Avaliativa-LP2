@@ -25,12 +25,12 @@ int main(void)
 
     // Alpha
     fread(&alpha, sizeof(double), 1, fp);
-    printf("\nAlpha: %.1lf\n", alpha);
+    printf("\nAlpha: %.1lf\n\n", alpha);
 
     // Matrix A
     fread(&nla, sizeof(int), 1, fp);
     fread(&nca, sizeof(int), 1, fp);
-    printf("Dimenções Matriz A : %d x %d\n", nla, nca);
+    printf("Dimensions Matriz A : %d x %d\n", nla, nca);
 
     matA = alocaMatriz1d(nla, nca);
     fread(matA, sizeof(double), nla * nca, fp);
@@ -38,19 +38,19 @@ int main(void)
     // Matrix B
     fread(&nlb, sizeof(int), 1, fp);
     fread(&ncb, sizeof(int), 1, fp);
-    printf("Dimenções Matriz B : %d x %d\n", nlb, ncb);
+    printf("Dimensions Matriz B : %d x %d\n\n", nlb, ncb);
 
     matB = alocaMatriz1d(nlb, ncb);
     fread(matB, sizeof(double), nlb * ncb, fp);
 
     // Beta
     fread(&beta, sizeof(double), 1, fp);
-    printf("Beta: %.1lf\n", beta);
+    printf("Beta: %.1lf\n\n", beta);
 
     // Matrix C
     fread(&nlc, sizeof(int), 1, fp);
     fread(&ncc, sizeof(int), 1, fp);
-    printf("Dimenções Matriz C : %d x %d\n", nlc, ncc);
+    printf("Dimensions Matriz C : %d x %d\n\n", nlc, ncc);
 
     matC = alocaMatriz1d(nlc, ncc);
     fread(matC, sizeof(double), nlc * ncc, fp);
@@ -65,11 +65,11 @@ int main(void)
 
     end_t = clock();
     total_t = (double)(end_t - start_t) / CLOCKS_PER_SEC;
-    printf("Total time taken by CPU: %f\n", total_t);
+    printf("Total time taken by CPU: %f\n\n", total_t);
 
     system("pause");
 
-    print_matrix("Resulting Matrix C:", nlc, ncc, matC);
+    print_matrix("Matriz Resultante C:", nlc, ncc, matC);
 
     system("pause");
 
