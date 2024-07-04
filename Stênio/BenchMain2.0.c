@@ -101,8 +101,8 @@ void dgemm1d(int m, int n, int k, double alpha, double *matA, double *matB, doub
                 {
                     for (int j = jj; j < jj + blockSize && j < n; j++)
                     {
-                        if (kk == 0) {
-                            // Only apply beta scaling during the first iteration of kk
+                        if (kk == 0)
+                        {
                             matC[i * n + j] *= beta;
                         }
 
@@ -111,7 +111,7 @@ void dgemm1d(int m, int n, int k, double alpha, double *matA, double *matB, doub
                         {
                             cij += matA[i * k + p] * matB[p * n + j];
                         }
-                        #pragma omp atomic
+#pragma omp atomic
                         matC[i * n + j] += alpha * cij;
                     }
                 }
