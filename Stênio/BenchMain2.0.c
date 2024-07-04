@@ -1,9 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <omp.h>
+// gcc -fopenmp BenchMain2.0.c
 
 double *alocaMatriz1d(int nl, int nc);
 void dgemm1d(int m, int n, int k, double alpha, double *matA, double *matB, double beta, double *matC);
+void print_matrix(const char *desc, int m, int n, double *mat);
 
 int main(void)
 {
@@ -22,7 +25,7 @@ int main(void)
 
     // Alpha
     fread(&alpha, sizeof(double), 1, fp);
-    printf("alpha: %.1lf\n", alpha);
+    printf("\nalpha: %.1lf\n", alpha);
 
     // Matrix A
     fread(&nla, sizeof(int), 1, fp);
@@ -31,6 +34,7 @@ int main(void)
 
     matA = alocaMatriz1d(nla, nca);
     fread(matA, sizeof(double), nla * nca, fp);
+    print_matrix("Matrix A", nla, nca, matA);
 
     // Matrix B
     fread(&nlb, sizeof(int), 1, fp);
@@ -39,6 +43,7 @@ int main(void)
 
     matB = alocaMatriz1d(nlb, ncb);
     fread(matB, sizeof(double), nlb * ncb, fp);
+    print_matrix("Matrix B", nlb, ncb, matB);
 
     // Beta
     fread(&beta, sizeof(double), 1, fp);
@@ -51,6 +56,7 @@ int main(void)
 
     matC = alocaMatriz1d(nlc, ncc);
     fread(matC, sizeof(double), nlc * ncc, fp);
+    print_matrix("Matrix C:", nlc, ncc, matC);
 
     // Teste
     clock_t start_t,
@@ -63,6 +69,12 @@ int main(void)
     end_t = clock();
     total_t = (double)(end_t - start_t) / CLOCKS_PER_SEC;
     printf("Total time taken by CPU: %f\n", total_t);
+
+    system("pause");
+
+    print_matrix("Resulting Matrix C:", nlc, ncc, matC);
+
+    system("pause");
 
     free(matA);
     free(matB);
@@ -79,16 +91,49 @@ double *alocaMatriz1d(const int n, const int m)
 
 void dgemm1d(int m, int n, int k, double alpha, double *matA, double *matB, double beta, double *matC)
 {
+    int blockSize = 64;
+
+#pragma omp parallel for
+    for (int ii = 0; ii < m; ii += blockSize)
+    {
+        for (int jj = 0; jj < n; jj += blockSize)
+        {
+            for (int kk = 0; kk < k; kk += blockSize)
+            {
+                for (int i = ii; i < ii + blockSize && i < m; i++)
+                {
+                    for (int j = jj; j < jj + blockSize && j < n; j++)
+                    {
+                        if (kk == 0) {
+                            // Only apply beta scaling during the first iteration of kk
+                            matC[i * n + j] *= beta;
+                        }
+
+                        double cij = 0.0;  // Initialize to zero for accumulation
+                        for (int p = kk; p < kk + blockSize && p < k; p++)
+                        {
+                            cij += matA[i * k + p] * matB[p * n + j];
+                        }
+                        #pragma omp atomic
+                        matC[i * n + j] += alpha * cij;
+                    }
+                }
+            }
+        }
+    }
+}
+
+void print_matrix(const char *desc, int m, int n, double *mat)
+{
+    printf("\n%s \n", desc);
+    m = 1;
+    n = 2;
     for (int i = 0; i < m; i++)
     {
         for (int j = 0; j < n; j++)
         {
-            double cij = beta * matC[i * n + j];
-            for (int p = 0; p < k; p++)
-            {
-                cij += alpha * matA[i * k + p] * matB[p * n + j];
-            }
-            matC[i * n + j] = cij;
+            printf(" %.2f", mat[i * n + j]);
         }
+        printf("\n\n");
     }
 }

@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <omp.h>
 
 double *alocaMatriz1d(int nl, int nc);
 void dgemm1d(int m, int n, int k, double alpha, double *matA, double *matB, double beta, double *matC);
@@ -66,7 +65,7 @@ int main(void)
     total_t = (double)(end_t - start_t) / CLOCKS_PER_SEC;
     printf("Total time taken by CPU: %f\n", total_t);
 
-    print_matrix("Resulting Matrix C", ncb, nca, matC);
+    print_matrix("Resulting Matrix C", nlc, ncc, matC);
 
     free(matA);
     free(matB);
@@ -83,28 +82,16 @@ double *alocaMatriz1d(const int n, const int m)
 
 void dgemm1d(int m, int n, int k, double alpha, double *matA, double *matB, double beta, double *matC)
 {
-    int blockSize = 64;
-
-#pragma omp parallel for
-    for (int ii = 0; ii < m; ii += blockSize)
+    for (int i = 0; i < m; i++)
     {
-        for (int jj = 0; jj < n; jj += blockSize)
+        for (int j = 0; j < n; j++)
         {
-            for (int kk = 0; kk < k; kk += blockSize)
+            double cij = beta * matC[i * n + j];
+            for (int p = 0; p < k; p++)
             {
-                for (int i = ii; i < ii + blockSize && i < m; i++)
-                {
-                    for (int j = jj; j < jj + blockSize && j < n; j++)
-                    {
-                        double cij = beta * matC[i * n + j];
-                        for (int p = kk; p < kk + blockSize && p < k; p++)
-                        {
-                            cij += alpha * matA[i * k + p] * matB[p * n + j];
-                        }
-                        matC[i * n + j] = cij;
-                    }
-                }
+                cij += alpha * matA[i * k + p] * matB[p * n + j];
             }
+            matC[i * n + j] = cij;
         }
     }
 }
@@ -116,7 +103,7 @@ void print_matrix(const char *desc, int m, int n, double *mat)
     {
         for (int j = 0; j < n; j++)
         {
-            printf(" %6.2f", mat[i * n + j]);
+            printf(" %.2f", mat[i * n + j]);
         }
         printf("\n");
     }
