@@ -124,7 +124,7 @@ void dgemm1d(int m, int n, int k, double alpha, double *matA, double *matB, doub
                         {
                             cij += matA[i * k + p] * matB[p * n + j];
                         }
-#pragma omp atomic
+
                         matC[i * n + j] += alpha * cij;
                     }
                 }
@@ -136,8 +136,8 @@ void dgemm1d(int m, int n, int k, double alpha, double *matA, double *matB, doub
 void printMatriz(const char *desc, int m, int n, double *mat)
 {
     printf("\n%s \n", desc);
-    m = 5;
-    n = 5;
+    m = 10;
+    n = 10;
     for (int i = 0; i < m; i++)
     {
         for (int j = 0; j < n; j++)
